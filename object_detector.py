@@ -191,9 +191,7 @@ class ObjectDetector:
 
     self._set_input_tensor(input_tensor)
 
-    print('before invoke')
     self._interpreter.invoke()
-    print('after invoke')
     
     # Get all output details
     boxes = self._get_output_tensor(self._OUTPUT_LOCATION_NAME)
