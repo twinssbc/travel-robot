@@ -27,10 +27,10 @@ from object_detector import ObjectDetector
 from object_detector import ObjectDetectorOptions
 from car_control import CarControl
 from camera_control import CameraControl
-
+from notification import Notification
 
 def run(model: str, camera_id: int, width: int, height: int, num_threads: int, detect_threshold: float,
-        speed: int, camera_x_angle: int, camera_y_angle: int) -> None:
+        speed: int, camera_x_angle: int, camera_y_angle: int, notification: bool) -> None:
     """Continuously run inference on images acquired from the camera.
 
     Args:
@@ -74,6 +74,8 @@ def run(model: str, camera_id: int, width: int, height: int, num_threads: int, d
     no_target_total_count = 30
 
     enable_search = True
+    close_enough_count = 0
+
     while True:
         success, image = camera.read_image()
         if not success:
@@ -147,6 +149,13 @@ def run(model: str, camera_id: int, width: int, height: int, num_threads: int, d
             if target_size/viewport_size > 0.20:
                 car.alert_close_to_target()
                 logging.info("target close enough")
+                if notification:
+                    if close_enough_count > 3:
+                        notification_agent = Notification()
+                        notification_agent.send_wechat(image)
+                        notification = False
+                    else:
+                        close_enough_count += 1
                 continue
             if result_center_x - center_x > x_axis_offset_threshold:
                 logging.info("target at right, spin right")
@@ -251,11 +260,16 @@ def main():
         required=False,
         type=int,
         default=100)
+    parser.add_argument(
+        '--notification',
+        help='notification',
+        required=False,
+        type=bool,
+        default=False)
     args = parser.parse_args()
 
     run(args.model, int(args.cameraId), args.frameWidth, args.frameHeight,
-        int(args.numThreads), float(args.detectThreshold), int(args.speed), int(args.cameraXAngle), int(args.cameraYAngle))
-
+        int(args.numThreads), float(args.detectThreshold), int(args.speed), int(args.cameraXAngle), int(args.cameraYAngle), args.notification)
 
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s %(message)s')
