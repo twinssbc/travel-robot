@@ -30,7 +30,7 @@ from camera_control import CameraControl
 from notification import Notification
 
 def run(model: str, camera_id: int, width: int, height: int, num_threads: int, detect_threshold: float,
-        speed: int, camera_x_angle: int, camera_y_angle: int, notification: bool) -> None:
+        speed: int, camera_x_angle: int, camera_y_angle: int, notification: bool, target_size_threshold: int) -> None:
     """Continuously run inference on images acquired from the camera.
 
     Args:
@@ -146,7 +146,7 @@ def run(model: str, camera_id: int, width: int, height: int, num_threads: int, d
                 max_size_ratio = target_size_ratio
             logging.info("target size ratio: %s, max ratio: %s",
                          target_size_ratio, max_size_ratio)
-            if target_size/viewport_size > 0.20:
+            if target_size/viewport_size * 100 > target_size_threshold:
                 car.alert_close_to_target()
                 logging.info("target close enough")
                 if notification:
@@ -266,10 +266,16 @@ def main():
         required=False,
         type=bool,
         default=False)
+    parser.add_argument(
+        '--targetSizeThreshold',
+        help='target size threshold',
+        required=False,
+        type=int,
+        default=20)
     args = parser.parse_args()
 
     run(args.model, int(args.cameraId), args.frameWidth, args.frameHeight,
-        int(args.numThreads), float(args.detectThreshold), int(args.speed), int(args.cameraXAngle), int(args.cameraYAngle), args.notification)
+        int(args.numThreads), float(args.detectThreshold), int(args.speed), int(args.cameraXAngle), int(args.cameraYAngle), args.notification, int(args.targetSizeThreshold))
 
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s %(message)s')
