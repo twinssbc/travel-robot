@@ -1,5 +1,7 @@
 # travel-robot
-this is the repository for robot hackathon
+This is a robot built on top of 4wd car which having RaspberryPi 4B chip and Camera.
+The car will patrol around the room and identify any lost mobile phone on the ground and move towards it.
+The tensor flow model is trained using EfficientDet, which is able to provide real time object recognition.
 
 ## Sample Command
 ```
